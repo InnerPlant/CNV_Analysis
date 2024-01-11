@@ -102,7 +102,9 @@ server = function(input, output,session){
   # output$sel <-renderTable(temp_sel())
   temp_expname <- reactive({print(input$text1)})
   # 
-  data <- eventReactive(input$run_button,{shiny_test(temp_bflo=temp_bflo(),temp_sel = temp_sel(),experiment_plate = temp_expname())})
+  
+  data <- if(!isTruthy(reactive(input$file2))){eventReactive(input$run_button,{shiny_test(temp_bflo=temp_bflo(),temp_sel = temp_sel(),experiment_plate = temp_expname())})}
+             else {eventReactive(input$run_button,{bFlo_only(temp_bflo=temp_bflo(),experiment_plate = temp_expname())})}
   output$final <-  renderDataTable(data(),)
   distinctdata <- reactive({distinct(data(),Sample,.keep_all = TRUE)})
   output$final_distinctdl <- downloadHandler(
@@ -128,9 +130,10 @@ server = function(input, output,session){
   #plot_fun<- function(data,title){data %>% filter(`Parent Plant Line`== title) %>% mutate(Sample = fct_reorder(Sample,Copy_Number_Mean_bflo)) %>% ggplot() + stat_summary(fun = "mean",aes(Sample,Copy_Number_bflo), geom = "point", color = "black") + stat_summary(fun.data = "mean_se", aes(Sample,Copy_Number_bflo), geom = "errorbar", color = "black") + geom_point(aes(Sample,Copy_Number_bflo), color = "grey", alpha = 0.4) +stat_summary(fun = "mean",aes(Sample,Copy_Number_sel), geom = "point", color = "red") + stat_summary(fun.data = "mean_se", aes(Sample,Copy_Number_sel), geom = "errorbar", color = "red") + geom_point(aes(Sample,Copy_Number_sel), color = "red", alpha = 0.4)+ labs(title=title, y = "Copy Number", x = NULL) + theme_pubclean(base_size = 12) + theme(axis.text.x=element_text(angle = 90, hjust = 0), legend.position="right") + scale_color_manual(colors)+ coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = TRUE)}
   plot_fun<- function(data,title){data %>% filter(`Parent Plant Line`== title) %>% gather(key = "Target", value = "Copy_Number",Copy_Number_bflo,Copy_Number_sel ) %>% filter(Target %in% as.vector(input$targets)) %>% mutate(Sample = fct_reorder(Sample,.[[input$targets2]])) %>% ggplot() + stat_summary(fun = "mean",aes(Sample,Copy_Number, color = Target), geom = "point") + stat_summary(fun.data = "mean_se", aes(Sample,Copy_Number, color = Target), geom = "errorbar")+ geom_point(aes(Sample,Copy_Number, color = Target), alpha = 0.4) + scale_color_manual(labels=c("bFLO","Selection"), breaks = c("Copy_Number_bflo","Copy_Number_sel"),values = colors) + labs(title=title, y = "Copy Number", x = NULL) + theme_classic(base_size = 12) + theme(axis.text.x=element_text(angle = 90, hjust = 0), legend.position="right") + coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = TRUE)}
   
- plot <- reactive({plot_fun(data(),input$parentplant)})
+  plot_bFlo <- function(data,title){data %>% filter(`Parent Plant Line`== title) %>% gather(key = "Target", value = "Copy_Number",Copy_Number_bflo ) %>% filter(Target %in% as.vector(input$targets)) %>% mutate(Sample = fct_reorder(Sample,.[[input$targets2]])) %>% ggplot() + stat_summary(fun = "mean",aes(Sample,Copy_Number, color = Target), geom = "point") + stat_summary(fun.data = "mean_se", aes(Sample,Copy_Number, color = Target), geom = "errorbar")+ geom_point(aes(Sample,Copy_Number, color = Target), alpha = 0.4) + scale_color_manual(labels=c("bFLO"), breaks = c("Copy_Number_bflo"),values = colors) + labs(title=title, y = "Copy Number", x = NULL) + theme_classic(base_size = 12) + theme(axis.text.x=element_text(angle = 90, hjust = 0), legend.position="right") + coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = TRUE)}
+ plot <- if(!isTruthy(reactive(input$file2))){reactive({plot_fun(data(),input$parentplant)})}else{reactive({plot_bFlo(data(),input$parentplant)})}
   
-  output$plots <- renderPlot({plot_fun(data(),input$parentplant)}, res = 96)
+  output$plots <-if(!isTruthy(reactive(input$file2))){renderPlot({plot_fun(data(),input$parentplant)}, res = 96)} else{renderPlot({plot_bFlo(data(),input$parentplant)}, res = 96)}
   
    observeEvent(input$plot_dblclick,{
     brush <- input$plot_dblclick
