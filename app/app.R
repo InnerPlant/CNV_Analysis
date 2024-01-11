@@ -46,7 +46,7 @@ ui = fluidPage(
                 accept = c(".xlsx"),multiple = TRUE),
       textInput('text1','Experiment',placeholder = "CNV.#.##"),
       actionButton("run_button","Run Analysis",icon=icon("play"))),
-      
+    
     mainPanel(
       tabsetPanel(
         tabPanel(
@@ -86,17 +86,17 @@ server = function(input, output,session){
   # })
   
   #Kinda Working, read in xlsx, append file name column, and then concatenate, cannot run shiny_test on themm
-   temp_bflo <- reactive({
+  temp_bflo <- reactive({
     temp = rbindlist(lapply(input$file1$datapath,import_test))
     as.data.frame(temp)
-   })
-   output$bflo_concat <- renderDataTable(temp_bflo())
-   
-   temp_sel <- reactive({
+  })
+  output$bflo_concat <- renderDataTable(temp_bflo())
+  
+  temp_sel <- reactive({
     temp =rbindlist(lapply(input$file2$datapath,import_test))
     as.data.frame(temp)
-    })
-   output$sel_concat <- renderDataTable(temp_sel())
+  })
+  output$sel_concat <- renderDataTable(temp_sel())
   
   # output$bflo<-renderTable(temp_bflo())
   # output$sel <-renderTable(temp_sel())
@@ -104,7 +104,7 @@ server = function(input, output,session){
   # 
   
   data <- if(!isTruthy(reactive(input$file2))){eventReactive(input$run_button,{shiny_test(temp_bflo=temp_bflo(),temp_sel = temp_sel(),experiment_plate = temp_expname())})}
-             else {eventReactive(input$run_button,{bFlo_only(temp_bflo=temp_bflo(),experiment_plate = temp_expname())})}
+  else {eventReactive(input$run_button,{bFlo_only(temp_bflo=temp_bflo(),experiment_plate = temp_expname())})}
   output$final <-  renderDataTable(data(),)
   distinctdata <- reactive({distinct(data(),Sample,.keep_all = TRUE)})
   output$final_distinctdl <- downloadHandler(
@@ -131,16 +131,16 @@ server = function(input, output,session){
   plot_fun<- function(data,title){data %>% filter(`Parent Plant Line`== title) %>% gather(key = "Target", value = "Copy_Number",Copy_Number_bflo,Copy_Number_sel ) %>% filter(Target %in% as.vector(input$targets)) %>% mutate(Sample = fct_reorder(Sample,.[[input$targets2]])) %>% ggplot() + stat_summary(fun = "mean",aes(Sample,Copy_Number, color = Target), geom = "point") + stat_summary(fun.data = "mean_se", aes(Sample,Copy_Number, color = Target), geom = "errorbar")+ geom_point(aes(Sample,Copy_Number, color = Target), alpha = 0.4) + scale_color_manual(labels=c("bFLO","Selection"), breaks = c("Copy_Number_bflo","Copy_Number_sel"),values = colors) + labs(title=title, y = "Copy Number", x = NULL) + theme_classic(base_size = 12) + theme(axis.text.x=element_text(angle = 90, hjust = 0), legend.position="right") + coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = TRUE)}
   
   plot_bFlo <- function(data,title){data %>% filter(`Parent Plant Line`== title) %>% gather(key = "Target", value = "Copy_Number",Copy_Number_bflo ) %>% filter(Target %in% as.vector(input$targets)) %>% mutate(Sample = fct_reorder(Sample,.[[input$targets2]])) %>% ggplot() + stat_summary(fun = "mean",aes(Sample,Copy_Number, color = Target), geom = "point") + stat_summary(fun.data = "mean_se", aes(Sample,Copy_Number, color = Target), geom = "errorbar")+ geom_point(aes(Sample,Copy_Number, color = Target), alpha = 0.4) + scale_color_manual(labels=c("bFLO"), breaks = c("Copy_Number_bflo"),values = colors) + labs(title=title, y = "Copy Number", x = NULL) + theme_classic(base_size = 12) + theme(axis.text.x=element_text(angle = 90, hjust = 0), legend.position="right") + coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = TRUE)}
- plot <- if(!isTruthy(reactive(input$file2))){reactive({plot_fun(data(),input$parentplant)})}else{reactive({plot_bFlo(data(),input$parentplant)})}
+  plot <- if(!isTruthy(reactive(input$file2))){reactive({plot_fun(data(),input$parentplant)})}else{reactive({plot_bFlo(data(),input$parentplant)})}
   
   output$plots <-if(!isTruthy(reactive(input$file2))){renderPlot({plot_fun(data(),input$parentplant)}, res = 96)} else{renderPlot({plot_bFlo(data(),input$parentplant)}, res = 96)}
   
-   observeEvent(input$plot_dblclick,{
+  observeEvent(input$plot_dblclick,{
     brush <- input$plot_dblclick
     if (!is.null(brush)) {
       ranges$x <- c(brush$xmin, brush$xmax)
       ranges$y <- c(brush$ymin, brush$ymax)
-
+      
     } else {
       ranges$x <- NULL
       ranges$y <- NULL
@@ -148,7 +148,7 @@ server = function(input, output,session){
   })
   output$plotdwnld <- downloadHandler(filename = function() {paste(input$parentplant,".pdf",sep="")},
                                       content = function(file) {
-                                                ggsave(filename = file, plot = plot(),height = 8.15, width = 11, dpi = 300)})
+                                        ggsave(filename = file, plot = plot(),height = 8.15, width = 11, dpi = 300)})
   
 }
 
