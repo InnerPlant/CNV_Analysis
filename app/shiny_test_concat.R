@@ -184,12 +184,11 @@ Sel_only<- function(temp_sel,experiment_plate){
   
   
   temp_sel$Target <- gsub(pattern = "sel",replacement = "bFLO", temp_sel$Target)
-  temp_sel$Target <- gsub(pattern = "Bflo",replacement = "bFLO", temp_sel$Target)
+
   
   temp2_sel<-temp_sel %>% pivot_wider(id_cols = c("Well", "Sample","Plate"),names_from = Target,values_from = c("Cq","Cq Mean"))
   
-  temp2_sel <- temp2_sel %>% mutate("ΔCq" = Cq_bFLO - Cq_ELF) %>% mutate("ΔCq_Mean" = `Cq Mean_bFLO` - `Cq Mean_ELF`)
-  
+  temp2_sel <- temp2_sel %>% mutate("ΔCq" = Cq_Spec - Cq_ELF) %>% mutate("ΔCq_Mean" = `Cq Mean_Spec` - `Cq Mean_ELF`)
   
   
   temp2_sel_e46 <- temp2_sel %>% filter(Sample=="E46-10"|Sample == "E46"| Sample == "e46")%>%select(Plate,ΔCq_Mean)
