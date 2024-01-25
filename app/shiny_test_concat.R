@@ -158,7 +158,7 @@ bFlo_only<- function(temp_bflo,experiment_plate){
   temp3 <- temp3 %>% filter(Sample != "Thorne" & Sample != "thorne" & Sample != "E46" & Sample != "e46" & Sample != "E46-10" & Sample != "No template" & Sample != "NTC" & Sample != "No Template" & Sample != "no template")
   temp3 <- temp3 %>% select(-Plate,-Calibrator_ΔCq)
   temp3 <- temp3 %>% mutate("Experiment" = experiment_plate)
-  temp3 <- temp3 %>% mutate_at(3:10,round,2)
+  temp3 <- temp3 %>% mutate_at(3:12,round,2)
   assign(experiment_plate,temp3,envir = .GlobalEnv)
   #write.csv(temp3,paste(experiment_plate,".csv",sep=""))
   temp3
@@ -235,7 +235,7 @@ Sel_only<- function(temp_sel,experiment_plate){
   temp3 <- temp3 %>% filter(Sample != "Thorne" & Sample != "thorne" & Sample != "E46" & Sample != "e46" & Sample != "E46-10" & Sample != "No template" & Sample != "NTC" & Sample != "No Template" & Sample != "no template")
   temp3 <- temp3 %>% select(-Plate,-Calibrator_ΔCq)
   temp3 <- temp3 %>% mutate("Experiment" = experiment_plate)
-  temp3 <- temp3 %>% mutate_at(3:10,round,2)
+  temp3 <- temp3 %>% mutate_at(3:12,round,2)
   assign(experiment_plate,temp3,envir = .GlobalEnv)
   #write.csv(temp3,paste(experiment_plate,".csv",sep=""))
   temp3
