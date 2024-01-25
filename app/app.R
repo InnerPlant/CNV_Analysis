@@ -174,13 +174,15 @@ server = function(input, output,session){
                                       content = function(file) {
                                         ggsave(filename = file, plot = plot(),height = 8.15, width = 11, dpi = 300)})
   
+  autoInvalidate <- reactiveTimer(10000)
+  observe({
+    autoInvalidate()
+    cat(".")
+  })
+  
 }
 
-autoInvalidate <- reactiveTimer(10000)
-observe({
-  autoInvalidate()
-  cat(".")
-})
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
