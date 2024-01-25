@@ -176,5 +176,11 @@ server = function(input, output,session){
   
 }
 
+autoInvalidate <- reactiveTimer(10000)
+observe({
+  autoInvalidate()
+  cat(".")
+})
+
 # Run the application 
 shinyApp(ui = ui, server = server)
